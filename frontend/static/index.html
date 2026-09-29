@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Pantry Recipe Concierge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+<style>
+  :root {
+    --accent: #10b981;
+    --accent-dark: #059669;
+    --accent-light: #ecfdf5;
+    --accent-gradient: linear-gradient(135deg, #059669 0%, #10b981 100%);
+    --bg: #f8fafc;
+    --card-bg: #ffffff;
+    --text-primary: #0f172a;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  }
+
+  * { box-sizing: border-box; }
+  
+  body {
+    margin: 0;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    background-color: var(--bg);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow-sm);
+    z-index: 10;
+  }
+
+  .header-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .brand-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--accent-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+
+  .brand-title {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .status-badge {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: var(--accent-light);
+    padding: 0.3rem 0.75rem;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+
+  .status-dot {
+    width: 8px;
+    height: 8px;
+    background-color: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  }
+
+  #main-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    height: calc(100vh - 73px);
+  }
+
+  #log {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    scroll-behavior: smooth;
+  }
+
+  .msg {
+    display: flex;
+    flex-direction: column;
+    max-width: 85%;
+    animation: fadeIn 0.25s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg.user {
+    align-self: flex-end;
+  }
+
+  .msg.agent {
+    align-self: flex-start;
+  }
+
+  .msg-meta {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.3rem;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+
+  .msg.user .msg-meta {
+    justify-content: flex-end;
+  }
+
+  .bubble {
+    padding: 0.9rem 1.25rem;
+    border-radius: 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    line-height: 1.5;
+    box-shadow: var(--shadow-sm);
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .msg.user .bubble {
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    border-bottom-right-radius: 4px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+  }
+
+  .msg.agent .bubble {
+    border-bottom-left-radius: 4px;
+  }
+
+  .bubble.rich {
+    background: transparent;
+    border: none;
+    padding: 0;
+    box-shadow: none;
+    max-width: 100%;
+    white-space: normal;
+  }
+
+  .controls-wrapper {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  /* Quick Prompt Chips */
+  .quick-prompts {
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+    scrollbar-width: none;
+  }
+
+  .quick-prompts::-webkit-scrollbar {
+    display: none;
+  }
+
+  .chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.45rem 0.9rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .chip:hover {
+    background: var(--accent-light);
+    border-color: var(--accent);
+    color: var(--accent-dark);
+    transform: translateY(-1px);
+  }
+
+  form {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.85rem 1.2rem;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: all 0.2s ease;
+    background: var(--bg);
+  }
+
+  input:focus {
+    background: #fff;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+  }
+
+  button {
+    padding: 0.85rem 1.5rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent-gradient);
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+  }
+
+  button:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  /* --- A2UI component styles --- */
+  .a2card {
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 1.25rem;
+    background: #fff;
+    box-shadow: var(--shadow-md);
+    max-width: 100%;
+  }
+  .a2card + .a2card, .a2col > .a2card { margin-top: 0.75rem; }
+  .a2col { display: flex; flex-direction: column; gap: 0.5rem; }
+  .a2row { display: flex; flex-direction: row; gap: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .a2row.between { justify-content: space-between; }
+  .a2text { margin: 0; line-height: 1.5; }
+  .a2text.a2-h1 { font-family: 'Outfit', sans-serif; font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
+  .a2text.a2-h2 { font-family: 'Outfit', sans-serif; font-size: 1.2rem; font-weight: 700; color: var(--text-primary); }
+  .a2text.a2-h3 { font-size: 1.05rem; font-weight: 600; }
+  .a2text.a2-h4 { font-size: 0.95rem; font-weight: 600; }
+  .a2text.a2-caption { font-size: 0.85rem; color: var(--text-secondary); }
+  .a2divider { border: none; border-top: 1px solid var(--border); margin: 0.5rem 0; width: 100%; }
+  .a2img { max-width: 100%; border-radius: 12px; display: block; margin-top: 0.5rem; box-shadow: var(--shadow-sm); }
+  .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined';
+    font-size: 1.25rem;
+    line-height: 1;
+    vertical-align: middle;
+    color: var(--accent-dark);
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-brand">
+    <div class="brand-icon">🍳</div>
+    <div class="brand-title">Smart Pantry Recipe Concierge</div>
+  </div>
+  <div class="status-badge">
+    <span class="status-dot"></span>
+    <span>Agent Active</span>
+  </div>
+</header>
+
+<div id="main-container">
+  <div id="log">
+    <div class="msg agent">
+      <div class="msg-meta">
+        <span class="material-symbols-outlined" style="font-size: 1rem;">restaurant</span>
+        <span>Concierge</span>
+      </div>
+      <div class="bubble">Hello! I'm your Smart Pantry Recipe Concierge. I can help you manage your kitchen inventory, suggest delicious recipes, check for dietary restrictions, or locate nearby grocery stores. What would you like to do today?</div>
+    </div>
+  </div>
+
+  <div class="controls-wrapper">
+    <div class="quick-prompts">
+      <div class="chip" onclick="sendPrompt('What ingredients do I currently have in my pantry?')">
+        <span>📦</span> What's in my pantry?
+      </div>
+      <div class="chip" onclick="sendPrompt('Suggest a quick recipe based on my available ingredients')">
+        <span>🍳</span> Recommend a recipe
+      </div>
+      <div class="chip" onclick="sendPrompt('Find nearby grocery stores and supermarkets')">
+        <span>🛒</span> Find nearby grocery stores
+      </div>
+    </div>
+
+    <form id="form">
+      <div class="input-wrapper">
+        <input id="input" placeholder="Ask about pantry items, recipes, or grocery stores..." autocomplete="off" autofocus>
+      </div>
+      <button type="submit">
+        <span>Send</span>
+        <span class="material-symbols-outlined" style="color:white; font-size: 1.1rem;">send</span>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script>
+const log = document.getElementById("log");
+const form = document.getElementById("form");
+const input = document.getElementById("input");
+
+function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function bubble(who) {
+  const m = el("div", "msg " + who);
+  const meta = el("div", "msg-meta");
+  if (who === "user") {
+    meta.textContent = "You";
+  } else {
+    const icon = el("span", "material-symbols-outlined", "restaurant");
+    icon.style.fontSize = "1rem";
+    meta.appendChild(icon);
+    meta.appendChild(document.createTextNode(" Concierge"));
+  }
+  m.appendChild(meta);
+  const b = el("div", "bubble");
+  m.appendChild(b); log.appendChild(m); log.scrollTop = log.scrollHeight;
+  return b;
+}
+
+function sendPrompt(promptText) {
+  input.value = promptText;
+  form.dispatchEvent(new Event("submit", { cancelable: true }));
+}
+
+function boundStr(v) {
+  if (v == null) return "";
+  if (typeof v === "string") return v;
+  if (typeof v.literalString === "string") return v.literalString;
+  return "";
+}
+
+function childIds(props) {
+  const ids = [];
+  if (props && typeof props.child === "string") ids.push(props.child);
+  const ch = props && props.children;
+  if (ch && Array.isArray(ch.explicitList)) for (const c of ch.explicitList) if (typeof c === "string") ids.push(c);
+  return ids;
+}
+
+function iconName(n) { return String(n || "").replace(/([a-z0-9])([A-Z])/g, "$1_$2").replace(/\s+/g, "_").toLowerCase(); }
+
+function buildNode(id, comps, seen) {
+  if (!id || seen.has(id)) return null;
+  seen.add(id);
+  const spec = comps[id];
+  if (!spec || typeof spec !== "object") return null;
+  const type = Object.keys(spec)[0];
+  const props = spec[type] || {};
+  const kids = () => childIds(props).map(cid => buildNode(cid, comps, seen)).filter(Boolean);
+
+  switch (type) {
+    case "Card": {
+      const d = el("div", "a2card"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Column":
+    case "List": {
+      const horizontal = type === "List" && props.direction === "horizontal";
+      const d = el("div", horizontal ? "a2row" : "a2col"); kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Row": {
+      const d = el("div", "a2row" + (props.distribution === "spaceBetween" ? " between" : ""));
+      kids().forEach(n => d.appendChild(n)); return d;
+    }
+    case "Text": {
+      const t = el("div", "a2text");
+      const hint = String(props.usageHint || "body").toLowerCase();
+      if (["h1", "h2", "h3", "h4", "h5", "h6"].includes(hint)) t.classList.add("a2-" + hint);
+      else if (hint === "caption") t.classList.add("a2-caption");
+      t.textContent = boundStr(props.text);
+      return t;
+    }
+    case "Divider":
+      return el("hr", "a2divider");
+    case "Image": {
+      const src = boundStr(props.url || props.src);
+      if (!/^https?:\/\//i.test(src)) return null;
+      const img = el("img", "a2img"); img.src = src; img.alt = boundStr(props.alt) || ""; return img;
+    }
+    case "Icon": {
+      const s = el("span", "material-symbols-outlined"); s.textContent = iconName(boundStr(props.name) || props.name); return s;
+    }
+    default:
+      return null;
+  }
+}
+
+function renderSurface(messages, container) {
+  const comps = {};
+  const roots = [];
+  for (const m of messages) {
+    if (m.beginRendering && typeof m.beginRendering.root === "string") roots.push(m.beginRendering.root);
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.id && c.component) comps[c.id] = c.component;
+  }
+  let rootIds = roots.filter(r => comps[r]);
+  if (rootIds.length === 0) {
+    const referenced = new Set();
+    for (const id in comps) { const spec = comps[id]; childIds(spec[Object.keys(spec)[0]] || {}).forEach(c => referenced.add(c)); }
+    rootIds = Object.keys(comps).filter(id => !referenced.has(id));
+  }
+  let drew = false;
+  for (const rid of rootIds) { const node = buildNode(rid, comps, new Set()); if (node) { container.appendChild(node); drew = true; } }
+  return drew;
+}
+
+function flattenText(messages) {
+  const out = [];
+  for (const m of messages) {
+    const su = m.surfaceUpdate;
+    if (su && Array.isArray(su.components)) for (const c of su.components) if (c && c.component && c.component.Text) out.push(boundStr(c.component.Text.text));
+  }
+  return out.join("\n").trim();
+}
+
+function renderReply(b, parts) {
+  b.textContent = "";
+  const texts = parts.filter(p => p && (p.kind === "text" || (!p.kind && p.text))).map(p => p.text || "");
+  const a2ui = parts.filter(p => p && p.kind === "a2ui" && p.data).map(p => p.data);
+
+  const textStr = texts.join("\n").trim();
+  if (textStr) b.appendChild(el("div", null, textStr));
+
+  if (a2ui.length) {
+    b.classList.add("rich");
+    if (!renderSurface(a2ui, b)) b.appendChild(el("div", null, flattenText(a2ui) || "(no card content)"));
+  }
+  if (!b.childNodes.length) b.textContent = "(no response)";
+  log.scrollTop = log.scrollHeight;
+}
+
+form.addEventListener("submit", async (ev) => {
+  ev.preventDefault();
+  const text = input.value.trim();
+  if (!text) return;
+  bubble("user").textContent = text;
+  input.value = "";
+  const b = bubble("agent"); b.textContent = "…";
+  try {
+    const res = await fetch("/chat", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: text }) });
+    const raw = await res.text();
+    let data;
+    try { data = JSON.parse(raw); }
+    catch { throw new Error(`Server returned non-JSON (HTTP ${res.status}). ${raw.slice(0, 300)}`); }
+    renderReply(b, data.parts || []);
+  } catch (e) {
+    b.textContent = "Error: " + e.message;
+  }
+});
+</script>
+</body>
+</html>
